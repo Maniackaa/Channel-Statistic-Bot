@@ -37,29 +37,12 @@ services:
           cpus: '0.5'
           memory: 1G
 
-  redis:
-    container_name: redis
-    image: redis:latest
-    restart: always
-    environment:
-      - REDIS_PASSWORD=$REDIS_PASSWORD
-      - REDIS_PORT=$REDIS_PORT
-      - REDIS_DATABASES=16
-    entrypoint: redis-server --appendonly yes --requirepass $REDIS_PASSWORD --maxmemory 512mb --maxmemory-policy allkeys-lru
-    networks:
-      - default
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./redis/data:/data
-      - ./redis/etc/redis.conf:/usr/local/etc/redis/redis.conf
 
-#  bot:
-#    restart: always
-#    build: .
-#    env_file: .env
-#    depends_on:
-#      - redis
-#      - db_postgres
-#    volumes:
-#      - ./logs:/app/logs/
+  bot:
+    restart: always
+    build: .
+    env_file: .env
+    depends_on:
+      - db_postgres
+    volumes:
+      - ./logs:/app/logs/

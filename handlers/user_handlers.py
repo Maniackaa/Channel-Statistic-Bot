@@ -192,7 +192,7 @@ async def select(callback: CallbackQuery, state: FSMContext):
 async def stop(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     user = get_or_create_user(callback.from_user)
-    channels: list[Channel] = get_only_your_channels(user)
+    channels: list[Channel] = get_your_channels(user)
     await callback.message.answer('Изменить мониторинг', reply_markup=channel_kb(1, channels))
 
 
