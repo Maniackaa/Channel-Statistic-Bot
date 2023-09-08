@@ -56,7 +56,7 @@ class Channel(Base):
     title: Mapped[str] = mapped_column(String(50), nullable=True)
     description: Mapped[str] = mapped_column(String(250), nullable=True)
     is_active: Mapped[int] = mapped_column(Integer(), default=1)
-    owner_id: Mapped[int] = mapped_column(ForeignKey('users.id'), ondelete='CASCADE')
+    owner_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
     owner: Mapped['User'] = relationship(back_populates='channels')
     secret: Mapped[str] = mapped_column(String(36), nullable=True, default=lambda: uuid.uuid4())
 
@@ -78,7 +78,7 @@ class Action(Base):
                                     comment='Первичный ключ')
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     user: Mapped['User'] = relationship(back_populates='actions')
-    channel_id: Mapped[int] = mapped_column(ForeignKey('channels.id'), ondelete='CASCADE')
+    channel_id: Mapped[int] = mapped_column(ForeignKey('channels.id', ondelete='CASCADE'))
     join_time: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
     left_time: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
 
