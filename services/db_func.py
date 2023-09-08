@@ -1,0 +1,232 @@
+import asyncio
+import datetime
+import logging
+from typing import Optional
+
+from aiogram.types import Chat
+from sqlalchemy import select, insert, update
+
+from config_data.conf import LOGGING_CONFIG, conf, tz
+import logging.config
+
+from database.db import User, Session, Channel, Action
+from keyboards.keyboards import start_kb
+
+
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger('bot_logger')
+err_log = logging.getLogger('errors_logger')
+
+
+def check_user(tg_id: int | str) -> User:
+    """Возвращает найденного пользователя по tg_id"""
+    # logger.debug(f'Ищем юзера {tg_id}')
+    with Session() as session:
+        user: User = session.query(User).filter(User.tg_id == str(tg_id)).first()
+        # logger.debug(f'Результат: {user}')
+        return user
+
+
+def get_or_create_user(user, refferal=None) -> Optional[User]:
+    """Из юзера ТГ создает User"""
+    try:
+        old_user = check_user(user.id)
+        if old_user:
+            logger.debug('Пользователь есть в базе')
+            return old_user
+        # Создание нового пользователя
+        logger.debug('Добавляем пользователя')
+        with Session() as session:
+            new_user = User(tg_id=user.id,
+                            username=user.username,
+                            register_date=datetime.datetime.now(tz=tz),
+                            referral=refferal
+                            )
+            session.add(new_user)
+            session.commit()
+            logger.debug(f'Пользователь создан: {new_user}')
+        return new_user
+    except Exception as err:
+        err_log.error('Пользователь не создан', exc_info=True)
+
+
+def check_channel(chat: Chat):
+    """
+    Проверяет создан ли такой канал
+
+    :param chat:
+    :param user:
+    :return:
+    """
+    logger.debug(f'Проверяем канал {chat.id}')
+    session = Session()
+    channel_q = select(Channel).where(Channel.channel_id == chat.id)
+    channel = session.execute(channel_q).scalars().all()
+    if channel:
+        return channel[0]
+
+
+def get_or_create_channel(chat: Chat, user: User) -> Channel:
+    """
+    Создает канал для отслеживания
+
+    :param chat:
+    :param user:
+    :return:
+    """
+    try:
+        logger.debug(f'Проверяем канал {chat.id}. Юзер: {user}')
+        session = Session()
+        channel_q = select(Channel).where(Channel.channel_id == chat.id)
+        channel = session.execute(channel_q).scalars().all()
+        print(chat.id)
+        print(channel)
+        if channel:
+            return channel[0]
+        logger.debug('Создаем новый канал')
+        new_channel = Channel(
+            channel_id=chat.id,
+            title=chat.title,
+            description=chat.description,
+            owner_id=user.id
+        )
+        session.add(new_channel)
+        session.commit()
+        logger.debug(f'Канал {new_channel} создан')
+        return new_channel
+    except Exception as err:
+        logger.error(err, exc_info=True)
+        raise err
+
+
+def add_join(user: User, channel: Channel):
+    """
+    Создает действие присоединения к каналу
+
+    :param chat:
+    :param user:
+    :return:
+    """
+    try:
+        logger.debug(f'Создаем join юзеру {user} в канал {channel}')
+        session = Session()
+        join_q = select(Action).where(Action.channel_id == channel.id, Action.user_id == user.id)
+        join_action: Action = session.execute(join_q).scalars().all()
+        if join_action:
+            action = join_action[0]
+            action.join_time = datetime.datetime.now(tz=tz)
+            session.commit()
+            logger.debug(f'Обновлен join action {action}')
+            return action
+        new_join = Action(
+            user_id=user.id,
+            channel_id=channel.id,
+            join_time=datetime.datetime.now(tz=tz)
+        )
+        session.add(new_join)
+        session.commit()
+        logger.debug(f'Новое Действие join создано {new_join}')
+        return new_join
+    except Exception as err:
+        logger.error(err, exc_info=True)
+        raise err
+
+def add_left(user: User, channel: Channel):
+    """
+    Создает действие выхода с канала
+
+    :param chat:
+    :param user:
+    :return:
+    """
+    try:
+        logger.debug(f'Создаем left юзеру {user} из канал {channel}')
+        session = Session()
+        left_q = select(Action).where(Action.channel_id == channel.id, Action.user_id == user.id)
+        left_action = session.execute(left_q).scalars().all()
+        if left_action:
+            action = left_action[0]
+            action.left_time = datetime.datetime.now(tz=tz)
+            session.commit()
+            logger.debug(f'Обновлен left action {action}')
+            return action
+        new_left = Action(
+            user_id=user.id,
+            channel_id=channel.id,
+            left_time=datetime.datetime.now(tz=tz)
+        )
+        session.add(new_left)
+        session.commit()
+        logger.debug(f'Новое Действие left создано {new_left}')
+        return new_left
+    except Exception as err:
+        logger.error(err, exc_info=True)
+        raise err
+
+
+def get_only_your_channels(user: User):
+    """
+    Находит ваши каналы
+    :return:
+    """
+    session = Session()
+    user_q = select(User).where(User.id == user.id)
+    user = session.execute(user_q).scalars().first()
+    channels = user.channels
+    secrets = user.secrets
+    return channels
+
+
+def get_your_channels(user: User):
+    """
+    Находит ваши каналы
+    :return:
+    """
+    session = Session()
+    user_q = select(User).where(User.id == user.id)
+    user = session.execute(user_q).scalars().first()
+    channels = user.channels
+    secrets = user.secrets
+    print(channels)
+    print(secrets)
+    channels2_q = select(Channel).where(Channel.secret.in_(secrets))
+    channels2 = session.execute(channels2_q).scalars().all()
+    print(channels2)
+    if channels2:
+        channels = channels + channels2
+    return channels
+
+
+def add_secret(user: User, secret: str):
+    session = Session()
+    old_values = user.secrets
+    q = update(User).where(User.id == user.id).values(secrets=old_values + [secret])
+    session.execute(q)
+    session.commit()
+
+
+def get_channel_from_id(channel_pk):
+    session = Session()
+    channel = session.execute(select(Channel).where(Channel.id == channel_pk)).scalars().first()
+    return channel
+
+
+def change_monitoring(channel_pk):
+    session = Session()
+    q = select(Channel).where(Channel.id == channel_pk)
+    channel: Channel = session.execute(q).scalars().one_or_none()
+    if channel.is_active:
+        channel.is_active = 0
+    else:
+        channel.is_active = 1
+    session.commit()
+
+
+if __name__ == '__main__':
+    pass
+    session = Session()
+    user = select(User).where(User.id == 1)
+    user = session.execute(user).scalars().first()
+    print(get_your_channels(user))
+
