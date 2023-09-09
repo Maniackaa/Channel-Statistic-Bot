@@ -202,7 +202,7 @@ def get_your_channels(user: User):
 def add_secret(user: User, secret: str):
     session = Session()
     old_values = user.secrets
-    q = update(User).where(User.id == user.id).values(secrets=old_values + [secret])
+    q = update(User).where(User.id == user.id).values(secrets=old_values or [] + [secret] or [])
     session.execute(q)
     session.commit()
 
