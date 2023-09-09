@@ -45,6 +45,7 @@ async def xls(message: Message, state: FSMContext, bot: Bot):
 
 @router.callback_query(F.data.startswith('xchannel_'))
 async def select(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    await callback.message.delete()
     try:
         channel_id = int(callback.data.split('channel_')[1])
         file_path = f'{callback.from_user.id}.xlsx'

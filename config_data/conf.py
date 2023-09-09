@@ -83,7 +83,6 @@ class TgBot:
     admin_ids: list[str]  # Список id администраторов бота
     base_dir = BASE_DIR
     TIMEZONE: pytz.timezone
-    GROUP_ID: str
 
 
 @dataclass
@@ -96,7 +95,6 @@ class Config:
     tg_bot: TgBot
     db: PostgresConfig
     logic: Logic
-    redis_db: RedisConfig
 
 
 def load_config(path: str | None) -> Config:
@@ -106,14 +104,7 @@ def load_config(path: str | None) -> Config:
     return Config(tg_bot=TgBot(token=env('BOT_TOKEN'),
                                admin_ids=list(map(str, env.list('ADMIN_IDS'))),
                                TIMEZONE=pytz.timezone(env('TIMEZONE')),
-                               GROUP_ID=env('GROUP_ID'),
                                ),
-                  redis_db=RedisConfig(
-                      redis_db_num=env('redis_db_num'),
-                      redis_host=env('redis_host'),
-                      REDIS_PORT=env('REDIS_PORT'),
-                      REDIS_PASSWORD=env('REDIS_PASSWORD'),
-                      ),
                   db=PostgresConfig(
                       database=env('POSTGRES_DB'),
                       db_host=env('DB_HOST'),
