@@ -190,11 +190,12 @@ def get_your_channels(user: User):
     secrets = user.secrets
     print(channels)
     print(secrets)
-    channels2_q = select(Channel).where(Channel.secret.in_(secrets))
-    channels2 = session.execute(channels2_q).scalars().all()
-    print(channels2)
-    if channels2:
-        channels = channels + channels2
+    if secrets:
+        channels2_q = select(Channel).where(Channel.secret.in_(secrets))
+        channels2 = session.execute(channels2_q).scalars().all()
+        print(channels2)
+        if channels2:
+            channels = channels + channels2
     return channels
 
 

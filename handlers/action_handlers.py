@@ -5,21 +5,14 @@ from aiogram.filters import Command, ChatMemberUpdatedFilter, MEMBER, LEFT, ADMI
 from aiogram.types import CallbackQuery, Message, ChatInviteLink, \
     InlineKeyboardButton, ChatMemberUpdated
 
-from aiogram.fsm.context import FSMContext
-from aiogram.utils.deep_linking import create_start_link, decode_payload
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config_data.conf import LOGGING_CONFIG, conf, tz
-import logging.config
+from config_data.conf import get_my_loggers
 
 from database.db import Channel
-from keyboards.keyboards import start_kb, custom_kb
-from lexicon.lexicon import LEXICON_RU
+
 from services.db_func import get_or_create_user, get_or_create_channel, add_join, add_left, check_channel
 
-logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger('bot_logger')
-err_log = logging.getLogger('errors_logger')
+logger, err_log = get_my_loggers()
 
 router: Router = Router()
 

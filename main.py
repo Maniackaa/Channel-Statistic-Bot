@@ -2,17 +2,11 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 
-from config_data.conf import LOGGING_CONFIG, conf, tz
+from config_data.conf import conf, get_my_loggers
 from handlers import user_handlers, action_handlers
 
-import logging.config
 
-
-logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger('bot_logger')
-err_log = logging.getLogger('errors_logger')
-
-
+logger, err_log = get_my_loggers()
 async def main():
     logger.info('Starting bot')
     bot: Bot = Bot(token=conf.tg_bot.token, parse_mode='HTML')

@@ -129,5 +129,9 @@ conf = load_config('.env')
 conf.db.db_url = f"postgresql+psycopg2://{conf.db.db_user}:{conf.db.db_password}@{conf.db.db_host}:{conf.db.db_port}/{conf.db.database}"
 tz = conf.tg_bot.TIMEZONE
 
-print(conf.db.db_url)
+
+def get_my_loggers():
+    import logging.config
+    logging.config.dictConfig(LOGGING_CONFIG)
+    return logging.getLogger('bot_logger'), logging.getLogger('errors_logger')
 

@@ -8,11 +8,8 @@ from aiogram.types import CallbackQuery, Message, ChatInviteLink, \
     InlineKeyboardButton, ChatMemberUpdated
 
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.deep_linking import create_start_link, decode_payload
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from config_data.conf import LOGGING_CONFIG, conf, tz
-import logging.config
+from config_data.conf import tz, get_my_loggers
 
 from database.db import Channel
 from keyboards.keyboards import start_kb, custom_kb, channel_kb
@@ -22,9 +19,7 @@ from services.db_func import get_or_create_user, get_your_channels, add_secret, 
 from services.stat_func import get_all_join, get_all_left, get_new_left, get_proc_new_left, get_join_with_login, \
     get_join_without_login, get_avg_time_lefted, get_avg_day_time_lefted, get_avg_time_all, get_left_joined
 
-logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger('bot_logger')
-err_log = logging.getLogger('errors_logger')
+logger, err_log = get_my_loggers()
 
 router: Router = Router()
 
@@ -52,8 +47,11 @@ async def channels(callback: CallbackQuery):
     print('channels')
     user = get_or_create_user(callback.from_user)
     your_channels = get_your_channels(user)
-    channel_text = '\n'.join([f'{channel.title}: <code>{channel.secret}</code> {"✅" if channel.is_active else "❌"}'  for channel in your_channels])
-    text = f'Ваши каналы:\n{channel_text}'
+    if your_channels:
+        channel_text = '\n'.join([f'{channel.title}: <code>{channel.secret}</code> {"✅" if channel.is_active else "❌"}'  for channel in your_channels])
+        text = f'Ваши каналы:\n{channel_text}'
+    else:
+        text = 'У вас нет каналов'
     await callback.message.edit_text(text, reply_markup=start_kb)
 
 
