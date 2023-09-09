@@ -257,9 +257,11 @@ def get_avg_time_all(channel_id, start=None, end=None):
     session = Session()
     if start and end:
         q = select(func.coalesce(Action.left_time, end) - Action.join_time).where(
+            Action.channel_id == channel_id).where(
             Action.join_time.is_not(None)).filter(Action.join_time >= start).filter(Action.join_time <= end)
     else:
         q = select(func.coalesce(Action.left_time, datetime.datetime.now(tz=tz)) - Action.join_time).where(
+            Action.channel_id == channel_id).where(
             Action.join_time.is_not(None))
     print(q)
     res = session.execute(q).scalars().all()
