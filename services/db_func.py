@@ -63,6 +63,7 @@ def check_channel(chat: Chat):
     session = Session()
     channel_q = select(Channel).where(Channel.channel_id == chat.id)
     channel = session.execute(channel_q).scalars().all()
+    session.close()
     if channel:
         return channel[0]
 
@@ -94,6 +95,7 @@ def get_or_create_channel(chat: Chat, user: User) -> Channel:
         session.add(new_channel)
         session.commit()
         logger.debug(f'Канал {new_channel} создан')
+        session.close()
         return new_channel
     except Exception as err:
         logger.error(err, exc_info=True)
@@ -127,6 +129,7 @@ def add_join(user: User, channel: Channel):
         session.add(new_join)
         session.commit()
         logger.debug(f'Новое Действие join создано {new_join}')
+        session.close()
         return new_join
     except Exception as err:
         logger.error(err, exc_info=True)
@@ -149,6 +152,7 @@ def add_left(user: User, channel: Channel):
             action = left_action[0]
             action.left_time = datetime.datetime.now(tz=tz)
             session.commit()
+            session.close()
             logger.debug(f'Обновлен left action {action}')
             return action
         new_left = Action(
@@ -159,6 +163,7 @@ def add_left(user: User, channel: Channel):
         session.add(new_left)
         session.commit()
         logger.debug(f'Новое Действие left создано {new_left}')
+        session.close()
         return new_left
     except Exception as err:
         logger.error(err, exc_info=True)
@@ -174,7 +179,6 @@ def get_only_your_channels(user: User):
     user_q = select(User).where(User.id == user.id)
     user = session.execute(user_q).scalars().first()
     channels = user.channels
-    secrets = user.secrets
     return channels
 
 
@@ -205,11 +209,13 @@ def add_secret(user: User, secret: str):
     q = update(User).where(User.id == user.id).values(secrets=old_values or [] + [secret] or [])
     session.execute(q)
     session.commit()
+    session.close()
 
 
 def get_channel_from_id(channel_pk):
     session = Session()
     channel = session.execute(select(Channel).where(Channel.id == channel_pk)).scalars().first()
+    session.close()
     return channel
 
 
@@ -222,6 +228,29 @@ def change_monitoring(channel_pk):
     else:
         channel.is_active = 1
     session.commit()
+    session.close()
+
+
+def find_user_tg_id(login, channel_id):
+    try:
+        session = Session()
+        q = select(Action).where(User.username == login).where(Action.channel_id == channel_id).join(User)
+        action: Action = session.execute(q).scalars().one_or_none()
+        if action:
+            return action.user.tg_id
+    except Exception as err:
+        raise err
+
+
+def find_user_join(login, channel_id):
+    try:
+        session = Session()
+        q = select(Action).where(User.username == login).where(Action.channel_id == channel_id).join(User)
+        action: Action = session.execute(q).scalars().one_or_none()
+        if action:
+            return action.join_time.date()
+    except Exception as err:
+        raise err
 
 
 if __name__ == '__main__':
@@ -230,4 +259,5 @@ if __name__ == '__main__':
     user = select(User).where(User.id == 1)
     user = session.execute(user).scalars().first()
     print(get_your_channels(user))
+    session.close()
 

@@ -3,8 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 
 from config_data.conf import conf, get_my_loggers
-from handlers import user_handlers, action_handlers
-
+from handlers import user_handlers, action_handlers, excel_handlers
 
 logger, err_log = get_my_loggers()
 async def main():
@@ -13,6 +12,7 @@ async def main():
     dp: Dispatcher = Dispatcher()
     dp.include_router(user_handlers.router)
     dp.include_router(action_handlers.router)
+    dp.include_router(excel_handlers.router)
     await bot.delete_webhook(drop_pending_updates=True)
 
     try:

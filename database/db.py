@@ -1,8 +1,5 @@
-import asyncio
-import datetime
-import sys
 import uuid
-from sqlite3 import Timestamp
+
 from time import time
 
 from sqlalchemy import create_engine, ForeignKey, Date, String, DateTime, \
@@ -20,7 +17,7 @@ logger = logging.getLogger('bot_logger')
 err_log = logging.getLogger('errors_logger')
 metadata = MetaData()
 db_url = f"postgresql+psycopg2://{conf.db.db_user}:{conf.db.db_password}@{conf.db.db_host}:{conf.db.db_port}/{conf.db.database}"
-engine = create_engine(db_url, echo=False)
+engine = create_engine(db_url, echo=False, max_overflow=-1 )
 
 
 Session = sessionmaker(bind=engine)
