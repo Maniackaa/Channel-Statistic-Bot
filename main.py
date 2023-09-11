@@ -23,7 +23,7 @@ async def main():
     except:
         err_log.critical(f'Не могу отравить сообщение {conf.tg_bot.admin_ids[0]}')
 
-    await dp.start_polling(bot, allowed_updates=["message", "inline_query", "my_chat_member", "chat_member", "callback_query"])
+    await dp.start_polling(bot, allowed_updates=["message", "my_chat_member", "chat_member", "callback_query"])
 
 
 if __name__ == '__main__':

@@ -5,9 +5,10 @@ from aiogram import Router, Bot, F
 from aiogram.filters import Command, ChatMemberUpdatedFilter, MEMBER, LEFT, ADMINISTRATOR, KICKED, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message, ChatInviteLink, \
-    InlineKeyboardButton, ChatMemberUpdated
+    InlineKeyboardButton, ChatMemberUpdated, FSInputFile
 
 from aiogram.fsm.context import FSMContext
+import pandas as pd
 
 from config_data.conf import tz, get_my_loggers
 
@@ -116,7 +117,7 @@ async def all_time(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
 
 @router.callback_query(F.data.startswith('channel_'), StateFilter(FSMStat.select))
-async def stat(callback: CallbackQuery, state: FSMContext):
+async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     print('stat')
     print(callback.data)
     channel_id = int(callback.data.split('channel_')[1])
@@ -124,8 +125,10 @@ async def stat(callback: CallbackQuery, state: FSMContext):
     channel = get_channel_from_id(channel_id)
     if data:
         text = f'Отчет за период {data["start_period"].strftime("%d.%m.%Y")} - {data["end_period"].strftime("%d.%m.%Y")} по каналу {channel.title}:\n'
+        period = f'{data["start_period"].strftime("%d.%m.%Y")} - {data["end_period"].strftime("%d.%m.%Y")}'
     else:
         text = f'Отчет за весь период по каналу {channel.title}:\n'
+        period = f'Весь период'
     all_join = get_all_join(channel_id)
     text += f'Всего вступило: {all_join}\n'
     all_left = get_all_left(channel_id)
@@ -133,8 +136,10 @@ async def stat(callback: CallbackQuery, state: FSMContext):
     text += f'Вступило с учетом всех отписок: {all_join - all_left}\n'
     if all_join != 0:
         text += f'Общий процент отписок за период: {round(all_left/all_join*100, 2)} %\n'
+        all_proc = round(all_left/all_join*100, 2)
     else:
         text += f'Общий процент отписок за период: -\n'
+        all_proc = '-'
     new_left = get_new_left(channel_id)
     text += f'Отписалось из новых подписчиков за период: {new_left}\n'
     left_joined = get_left_joined(channel_id)
@@ -146,12 +151,31 @@ async def stat(callback: CallbackQuery, state: FSMContext):
     join_without_login = get_join_without_login(channel_id)
     text += f'Подписки без логинов: {join_without_login}\n'
     avg_time_lefted = get_avg_time_lefted(channel_id)
-    text += f'Среднее время нахождение в канале ОТПИСАШИХСЯ за отчетный период: {avg_time_lefted} ч.\n'
+    text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период: {avg_time_lefted} ч.\n'
     avg_day_time_lefted = get_avg_day_time_lefted(channel_id)
-    text += f'Среднее время нахождение в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня: {avg_day_time_lefted} ч.\n'
+    text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период больше 1 дня: {avg_day_time_lefted} ч.\n'
     avg_time_all = get_avg_time_all(channel_id)
     text += f'Среднее время удержания всех подписчиков в канале >1 дня за период: {avg_time_all}'
     await callback.message.answer(text)
+
+    df = pd.DataFrame(columns=['Наименование', 'Показатель'])
+    df.loc[len(df.index)] = ['Отчетный период', period]
+    df.loc[len(df.index)] = ['Всего вступило', all_join]
+    df.loc[len(df.index)] = ['Всего отписалось', all_left]
+    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', all_join - all_left]
+    df.loc[len(df.index)] = ['Общий процент отписок за период', all_proc]
+    df.loc[len(df.index)] = ['Отписалось из новых подписчиков за период', new_left]
+    df.loc[len(df.index)] = ['Вступило с учетом отписок только тех кто вступил', left_joined]
+    df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left]
+    df.loc[len(df.index)] = ['Подписки с логинами', join_with_login]
+    df.loc[len(df.index)] = ['Подписки без логинов', join_without_login]
+    df.loc[len(df.index)] = ['Среднее время нахождение в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.']
+    df.loc[len(df.index)] = ['Среднее время нахождение в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.']
+    df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all]
+    df_file = f'{callback.from_user.id}.xlsx'
+    print(df.to_excel(df_file, index=False))
+    doc = FSInputFile(df_file)
+    await bot.send_document(chat_id=callback.from_user.id, document=doc)
     await state.clear()
     await callback.message.delete()
 

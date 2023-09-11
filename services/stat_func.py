@@ -235,7 +235,7 @@ def get_avg_day_time_lefted(channel_id, start=None, end=None):
         days = int(avg_time / 60 / 60 // 24)
         hours = int((avg_time - days * 24 * 60 * 60) / 60 // 60)
         mins = int((avg_time - days * 24 * 60 * 60 - hours * 60 * 60) // 60)
-        res_text = f'{days} дн, {hours} ч, {mins} м.)'
+        res_text = f'{days} дн, {hours} ч, {mins} м.'
         return res_text
     return '-'
 
