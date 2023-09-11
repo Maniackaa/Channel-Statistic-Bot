@@ -182,9 +182,17 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
 @router.message(F.text.regexp(r"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}").as_("digits"))
 async def secret(message: Message, state: FSMContext, bot: Bot):
-    await message.answer(message.text)
     user = get_or_create_user(message.from_user)
     add_secret(user, message.text)
+    your_channels = get_your_channels(user)
+    text = f'Ключ {message.text} добавлен.\n'
+    if your_channels:
+        channel_text = '\n'.join([f'{channel.title}: <code>{channel.secret}</code> {"✅" if channel.is_active else "❌"}'  for channel in your_channels])
+        text += f'Ваши каналы:\n{channel_text}'
+    else:
+        text = 'У вас нет каналов'
+
+    await message.answer(text)
 
 
 @router.callback_query(F.data == 'new_secret')
