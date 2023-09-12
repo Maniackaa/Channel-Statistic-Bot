@@ -208,15 +208,19 @@ def get_your_channels(user: User):
         if channels2:
             channels = channels + channels2
     logger.debug(f'Итого каналы: {channels}')
-    return channels
+    return set(channels)
 
 
 def add_secret(user: User, secret: str):
     session = Session()
     old_values = user.secrets
-    q = update(User).where(User.id == user.id).values(secrets=old_values or [] + [secret] or [])
+    logger.debug(f'Старые ключи: {old_values}')
+    new_secrets = old_values + [secret]
+    logger.debug(f'Новый список: {new_secrets}')
+    q = update(User).where(User.id == user.id).values(secrets=set(new_secrets))
     session.execute(q)
     session.commit()
+    logger.debug(f'Новые ключи: {user.secrets}')
     logger.debug(f'Добавлен ключ {secret} юзеру {user}')
     session.close()
 
