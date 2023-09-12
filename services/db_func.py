@@ -122,6 +122,7 @@ def add_join(user: User, channel: Channel, invite_link=None):
         if join_action:
             action = join_action[0]
             action.join_time = datetime.datetime.now(tz=tz)
+            action.invite_link = invite_link
             session.commit()
             logger.debug(f'Обновлен join action {action}')
             return action
@@ -195,16 +196,18 @@ def get_your_channels(user: User):
     session = Session()
     user_q = select(User).where(User.id == user.id)
     user = session.execute(user_q).scalars().first()
+    logger.debug(f'user: {user}')
     channels = user.channels
+    logger.debug(f'Ищем каналы {user}: {channels}')
     secrets = user.secrets
-    print(channels)
-    print(secrets)
+    logger.debug(f'Ключи: {secrets}')
     if secrets:
         channels2_q = select(Channel).where(Channel.secret.in_(secrets))
         channels2 = session.execute(channels2_q).scalars().all()
-        print(channels2)
+        logger.debug(f'Каналы из секретов: {channels2}')
         if channels2:
             channels = channels + channels2
+    logger.debug(f'Итого каналы: {channels}')
     return channels
 
 
@@ -214,6 +217,7 @@ def add_secret(user: User, secret: str):
     q = update(User).where(User.id == user.id).values(secrets=old_values or [] + [secret] or [])
     session.execute(q)
     session.commit()
+    logger.debug(f'Добавлен ключ {secret} юзеру {user}')
     session.close()
 
 
@@ -265,4 +269,3 @@ if __name__ == '__main__':
     user = session.execute(user).scalars().first()
     print(get_your_channels(user))
     session.close()
-

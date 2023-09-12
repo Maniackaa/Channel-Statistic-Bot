@@ -171,8 +171,8 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left]
     df.loc[len(df.index)] = ['Подписки с логинами', join_with_login]
     df.loc[len(df.index)] = ['Подписки без логинов', join_without_login]
-    df.loc[len(df.index)] = ['Среднее время нахождение в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.']
-    df.loc[len(df.index)] = ['Среднее время нахождение в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.']
+    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.']
+    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.']
     df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all]
     df_file = f'{callback.from_user.id}.xlsx'
     print(df.to_excel(df_file, index=False))
@@ -209,9 +209,11 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
 @router.message(F.text.regexp(r"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}").as_("digits"))
 async def secret(message: Message, state: FSMContext, bot: Bot):
+    logger.debug(f'Прислан код {message.text}')
     user = get_or_create_user(message.from_user)
     add_secret(user, message.text)
     your_channels = get_your_channels(user)
+    logger.debug(f'Теперь каналы: {your_channels}')
     text = f'Ключ {message.text} добавлен.\n'
     if your_channels:
         channel_text = '\n'.join([f'{channel.title}: <code>{channel.secret}</code> {"✅" if channel.is_active else "❌"}'  for channel in your_channels])

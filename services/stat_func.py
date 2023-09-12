@@ -192,7 +192,7 @@ def get_avg_time_lefted(channel_id, start=None, end=None):
     session = Session()
     avg_time_lefted_q = select(Action.left_time - Action.join_time).filter(
         Action.channel_id == channel_id).where(
-        Action.join_time.is_not(None)).where(Action.left_time.is_not(None))
+        Action.join_time.is_not(None)).where(Action.left_time.is_not(None)).where(Action.left_time > Action.join_time)
     if start:
         avg_time_lefted_q = avg_time_lefted_q.filter(Action.left_time >= start)
     if end:
