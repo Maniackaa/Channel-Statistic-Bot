@@ -70,7 +70,6 @@ async def part_time(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await callback.message.answer('Введите начало периода в формате ДД.ММ.ГГГГ')
     await state.set_state(FSMStat.start_period)
-    await callback.message.delete()
 
 
 @router.message(StateFilter(FSMStat.start_period))
