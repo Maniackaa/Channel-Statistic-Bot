@@ -157,8 +157,8 @@ def add_left(user: User, channel: Channel):
             action = left_action[0]
             action.left_time = datetime.datetime.now(tz=tz)
             session.commit()
-            session.close()
             logger.debug(f'Обновлен left action {action}')
+            session.close()
             return action
         new_left = Action(
             user_id=user.id,
