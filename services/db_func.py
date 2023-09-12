@@ -39,6 +39,9 @@ def get_or_create_user(user, refferal=None) -> Optional[User]:
         logger.debug('Добавляем пользователя')
         with Session() as session:
             new_user = User(tg_id=user.id,
+                            first_name=user.first_name,
+                            last_name=user.last_name,
+                            full_name=user.full_name,
                             username=user.username,
                             register_date=datetime.datetime.now(tz=tz),
                             referral=refferal
@@ -102,19 +105,20 @@ def get_or_create_channel(chat: Chat, user: User) -> Channel:
         raise err
 
 
-def add_join(user: User, channel: Channel):
+def add_join(user: User, channel: Channel, invite_link=None):
     """
     Создает действие присоединения к каналу
 
-    :param chat:
     :param user:
+    :param channel:
+    :param invite_link:
     :return:
     """
     try:
         logger.debug(f'Создаем join юзеру {user} в канал {channel}')
         session = Session()
         join_q = select(Action).where(Action.channel_id == channel.id, Action.user_id == user.id)
-        join_action: Action = session.execute(join_q).scalars().all()
+        join_action = session.execute(join_q).scalars().all()
         if join_action:
             action = join_action[0]
             action.join_time = datetime.datetime.now(tz=tz)
@@ -124,7 +128,8 @@ def add_join(user: User, channel: Channel):
         new_join = Action(
             user_id=user.id,
             channel_id=channel.id,
-            join_time=datetime.datetime.now(tz=tz)
+            join_time=datetime.datetime.now(tz=tz),
+            invite_link=invite_link
         )
         session.add(new_join)
         session.commit()

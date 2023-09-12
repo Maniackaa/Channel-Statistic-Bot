@@ -34,6 +34,9 @@ class User(Base):
                                     comment='Первичный ключ')
     tg_id: Mapped[str] = mapped_column(String(30))
     username: Mapped[str] = mapped_column(String(50), nullable=True)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=True)
+    last_name: Mapped[str] = mapped_column(String(50), nullable=True)
+    full_name: Mapped[str] = mapped_column(String(50), nullable=True)
     register_date: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
     channels: Mapped[list['Channel']] = relationship(back_populates='owner')
     referral: Mapped[str] = mapped_column(String(20), nullable=True)
@@ -78,6 +81,7 @@ class Action(Base):
     channel_id: Mapped[int] = mapped_column(ForeignKey('channels.id', ondelete='CASCADE'))
     join_time: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
     left_time: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
+    invite_link: Mapped[str] = mapped_column(String(50), nullable=True)
 
     def __repr__(self):
         return f'Action {self.id}. {self.join_time} - {self.left_time}'

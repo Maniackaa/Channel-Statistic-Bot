@@ -38,6 +38,7 @@ async def user_kick(event: ChatMemberUpdated, bot: Bot):
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=MEMBER))
 async def user_join(event: ChatMemberUpdated, bot: Bot):
     print('USER MEMBER')
+    print(event)
     try:
         chat = event.chat
         member = event.new_chat_member.user
@@ -45,7 +46,7 @@ async def user_join(event: ChatMemberUpdated, bot: Bot):
         user = get_or_create_user(member)
         channel: Channel = check_channel(chat)
         if channel and channel.is_active:
-            add_join(user, channel)
+            add_join(user, channel, event.invite_link)
 
     except Exception as err:
         err_log.error(err, exc_info=True)

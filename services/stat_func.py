@@ -280,7 +280,40 @@ def get_avg_time_all(channel_id, start=None, end=None):
         return '-'
 
 
-start1 = datetime.date(2023, 9, 4)
-end1 = datetime.date(2023, 9, 7)
+def incomings_in_period(channel_id, start=None, end=None):
+    """ВСТУПИЛИ ЗА УКАЗАННЫЙ ПЕРИОД"""
+    session = Session()
+    incomings_q = select(Action, Action.user).filter(
+        Action.channel_id == channel_id).where(
+        Action.join_time.is_not(None)).join(
+        User
+    )
+    if start:
+        incomings_q = incomings_q.filter(Action.join_time >= start)
+    if end:
+        incomings_q = incomings_q.filter(Action.join_time <= end + datetime.timedelta(days=1))
+    incomings: list[Action] = session.execute(incomings_q).scalars().all()
+    return incomings
 
-print(get_avg_time_all(channel_id=2, start=start1, end=end1))
+
+def outgoings_in_period(channel_id, start=None, end=None):
+    """ВЫШЛИ ЗА УКАЗАННЫЙ ПЕРИОД			"""
+    session = Session()
+    outgoings_q = select(Action, Action.user).filter(
+        Action.channel_id == channel_id).where(
+        Action.join_time.is_not(None)).where(
+        Action.left_time.is_not(None)).join(
+        User
+    )
+    if start:
+        outgoings_q = outgoings_q.filter(Action.left_time >= start)
+    if end:
+        outgoings_q = outgoings_q.filter(Action.left_time <= end + datetime.timedelta(days=1))
+    outgoings: list[Action] = session.execute(outgoings_q).scalars().all()
+    return outgoings
+
+
+x = outgoings_in_period(1)
+
+for usr in x:
+    print(usr.left_time - usr.join_time)

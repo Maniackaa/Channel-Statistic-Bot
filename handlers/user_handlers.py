@@ -12,13 +12,14 @@ import pandas as pd
 
 from config_data.conf import tz, get_my_loggers
 
-from database.db import Channel
+from database.db import Channel, User, Action
 from keyboards.keyboards import start_kb, custom_kb, channel_kb
 from lexicon.lexicon import LEXICON_RU
 from services.db_func import get_or_create_user, get_your_channels, add_secret, check_channel, get_channel_from_id, \
     get_only_your_channels, change_monitoring
 from services.stat_func import get_all_join, get_all_left, get_new_left, get_proc_new_left, get_join_with_login, \
-    get_join_without_login, get_avg_time_lefted, get_avg_day_time_lefted, get_avg_time_all, get_left_joined
+    get_join_without_login, get_avg_time_lefted, get_avg_day_time_lefted, get_avg_time_all, get_left_joined, \
+    incomings_in_period, outgoings_in_period
 
 logger, err_log = get_my_loggers()
 
@@ -129,9 +130,11 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     else:
         text = f'Отчет за весь период по каналу {channel.title}:\n'
         period = f'Весь период'
-    all_join = get_all_join(channel_id)
+    start = data.get('start_period')
+    end = data.get('end')
+    all_join = get_all_join(channel_id, start, end)
     text += f'Всего вступило: {all_join}\n'
-    all_left = get_all_left(channel_id)
+    all_left = get_all_left(channel_id, start, end)
     text += f'Всего отписалось: {all_left}\n'
     text += f'Вступило с учетом всех отписок: {all_join - all_left}\n'
     if all_join != 0:
@@ -140,21 +143,21 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     else:
         text += f'Общий процент отписок за период: -\n'
         all_proc = '-'
-    new_left = get_new_left(channel_id)
+    new_left = get_new_left(channel_id, start, end)
     text += f'Отписалось из новых подписчиков за период: {new_left}\n'
-    left_joined = get_left_joined(channel_id)
+    left_joined = get_left_joined(channel_id, start, end)
     text += f'Вступило с учетом отписок только тех кто вступил: {left_joined}\n'
-    proc_new_left = get_proc_new_left(channel_id)
+    proc_new_left = get_proc_new_left(channel_id, start, end)
     text += f'Процент отписок только НОВЫХ подписчиков за период: {proc_new_left} %\n'
-    join_with_login = get_join_with_login(channel_id)
+    join_with_login = get_join_with_login(channel_id, start, end)
     text += f'Подписки с логинами: {join_with_login}\n'
-    join_without_login = get_join_without_login(channel_id)
+    join_without_login = get_join_without_login(channel_id, start, end)
     text += f'Подписки без логинов: {join_without_login}\n'
-    avg_time_lefted = get_avg_time_lefted(channel_id)
+    avg_time_lefted = get_avg_time_lefted(channel_id, start, end)
     text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период: {avg_time_lefted} ч.\n'
-    avg_day_time_lefted = get_avg_day_time_lefted(channel_id)
+    avg_day_time_lefted = get_avg_day_time_lefted(channel_id, start, end)
     text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период больше 1 дня: {avg_day_time_lefted} ч.\n'
-    avg_time_all = get_avg_time_all(channel_id)
+    avg_time_all = get_avg_time_all(channel_id, start, end)
     text += f'Среднее время удержания всех подписчиков в канале >1 дня за период: {avg_time_all}'
     await callback.message.answer(text)
 
@@ -176,6 +179,31 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     print(df.to_excel(df_file, index=False))
     doc = FSInputFile(df_file)
     await bot.send_document(chat_id=callback.from_user.id, document=doc)
+
+    incoming_users: list[Action] = incomings_in_period(channel_id, start, end)
+    df_in = pd.DataFrame(columns=['Имя', 'Username', 'Дата вступления', 'Ссылка-инвайт'])
+    for action in incoming_users:
+        df_in.loc[len(df_in.index)] = [action.user.full_name,
+                                       action.user.username,
+                                       action.join_time.strftime("%d.%m.%Y"),
+                                       action.invite_link]
+    df_file_in = f'{callback.from_user.id}_in.xlsx'
+    df_in.to_excel(df_file_in, index=False)
+    doc = FSInputFile(df_file_in)
+    await bot.send_document(chat_id=callback.from_user.id, document=doc)
+
+    outgoing_users: list[Action] = outgoings_in_period(channel_id, start, end)
+    df_out = pd.DataFrame(columns=['Имя', 'Username', 'Дата вступления', 'Время нахождения в канале'])
+    for action in outgoing_users:
+        df_out.loc[len(df_out.index)] = [action.user.full_name,
+                                       action.user.username,
+                                       action.left_time.strftime("%d.%m.%Y"),
+                                       action.left_time - action.join_time]
+    df_file_out = f'{callback.from_user.id}_out.xlsx'
+    df_out.to_excel(df_file_out, index=False)
+    doc = FSInputFile(df_file_out)
+    await bot.send_document(chat_id=callback.from_user.id, document=doc)
+
     await state.clear()
     await callback.message.delete()
 
