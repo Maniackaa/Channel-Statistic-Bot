@@ -160,49 +160,44 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     text += f'Среднее время удержания всех подписчиков в канале >1 дня за период: {avg_time_all}'
     await callback.message.answer(text)
 
-    df = pd.DataFrame(columns=['Наименование', 'Показатель'])
-    df.loc[len(df.index)] = ['Отчетный период', period]
-    df.loc[len(df.index)] = ['Всего вступило', all_join]
-    df.loc[len(df.index)] = ['Всего отписалось', all_left]
-    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', all_join - all_left]
-    df.loc[len(df.index)] = ['Общий процент отписок за период', all_proc]
-    df.loc[len(df.index)] = ['Отписалось из новых подписчиков за период', new_left]
-    df.loc[len(df.index)] = ['Вступило с учетом отписок только тех кто вступил', left_joined]
-    df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left]
-    df.loc[len(df.index)] = ['Подписки с логинами', join_with_login]
-    df.loc[len(df.index)] = ['Подписки без логинов', join_without_login]
-    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.']
-    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.']
-    df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all]
+    df = pd.DataFrame(columns=['Наименование', 'Показатель', 'Дата', 'Доп инфо'])
+    df.loc[len(df.index)] = ['Отчетный период', period] + ['', '']
+    df.loc[len(df.index)] = ['Всего вступило', all_join] + ['', '']
+    df.loc[len(df.index)] = ['Всего отписалось', all_left] + ['', '']
+    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', all_join - all_left] + ['', '']
+    df.loc[len(df.index)] = ['Общий процент отписок за период', all_proc] + ['', '']
+    df.loc[len(df.index)] = ['Отписалось из новых подписчиков за период', new_left] + ['', '']
+    df.loc[len(df.index)] = ['Вступило с учетом отписок только тех кто вступил', left_joined] + ['', '']
+    df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left] + ['', '']
+    df.loc[len(df.index)] = ['Подписки с логинами', join_with_login] + ['', '']
+    df.loc[len(df.index)] = ['Подписки без логинов', join_without_login] + ['', '']
+    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.'] + ['', '']
+    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.'] + ['', '']
+    df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all] + ['', '']
+
+
+    df.loc[len(df.index)] = [''] * 4
+    df.loc[len(df.index)] = ['Имя', 'Username', 'Дата вступления', 'Ссылка-инвайт']
+    incoming_users: list[Action] = incomings_in_period(channel_id, start, end)
+    for action in incoming_users:
+        df.loc[len(df.index)] = [action.user.full_name,
+                                       action.user.username,
+                                       action.join_time.strftime("%d.%m.%Y"),
+                                       action.invite_link]
+
+    df.loc[len(df.index)] = [''] * 4
+    df.loc[len(df.index)] = ['Имя', 'Username', 'Дата отписки', 'Время нахождения в канале']
+    outgoing_users: list[Action] = outgoings_in_period(channel_id, start, end)
+    for action in outgoing_users:
+        df.loc[len(df.index)] = [action.user.full_name,
+                                       action.user.username,
+                                       action.left_time.strftime("%d.%m.%Y"),
+                                       action.left_time - action.join_time]
+
     df_file = f'{callback.from_user.id}.xlsx'
     print(df.to_excel(df_file, index=False))
     doc = FSInputFile(df_file)
     await bot.send_document(chat_id=callback.from_user.id, document=doc)
-
-    incoming_users: list[Action] = incomings_in_period(channel_id, start, end)
-    df_in = pd.DataFrame(columns=['Имя', 'Username', 'Дата вступления', 'Ссылка-инвайт'])
-    for action in incoming_users:
-        df_in.loc[len(df_in.index)] = [action.user.full_name,
-                                       action.user.username,
-                                       action.join_time.strftime("%d.%m.%Y"),
-                                       action.invite_link]
-    df_file_in = f'{callback.from_user.id}_in.xlsx'
-    df_in.to_excel(df_file_in, index=False)
-    doc = FSInputFile(df_file_in)
-    await bot.send_document(chat_id=callback.from_user.id, document=doc)
-
-    outgoing_users: list[Action] = outgoings_in_period(channel_id, start, end)
-    df_out = pd.DataFrame(columns=['Имя', 'Username', 'Дата вступления', 'Время нахождения в канале'])
-    for action in outgoing_users:
-        df_out.loc[len(df_out.index)] = [action.user.full_name,
-                                       action.user.username,
-                                       action.left_time.strftime("%d.%m.%Y"),
-                                       action.left_time - action.join_time]
-    df_file_out = f'{callback.from_user.id}_out.xlsx'
-    df_out.to_excel(df_file_out, index=False)
-    doc = FSInputFile(df_file_out)
-    await bot.send_document(chat_id=callback.from_user.id, document=doc)
-
     await state.clear()
     await callback.message.delete()
 
