@@ -32,23 +32,27 @@ async def user_kick(event: ChatMemberUpdated, bot: Bot):
             add_left(user, channel)
 
     except Exception as err:
+        logger.error(err)
         err_log.error(err, exc_info=True)
 
 
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=MEMBER))
 async def user_join(event: ChatMemberUpdated, bot: Bot):
-    print('USER MEMBER')
-    print(event)
+    logger.debug('USER MEMBER')
     try:
         chat = event.chat
         member = event.new_chat_member.user
+        logger.debug(f'member: {member}')
         logger.info(f'Юзер {member.username} {member.id} присоединился к каналу {chat.id} {chat.title} ')
         user = get_or_create_user(member)
+        logger.debug(f'user: {user}')
         channel: Channel = check_channel(chat)
+        logger.debug(f'channel: {channel}')
         if channel and channel.is_active:
             add_join(user, channel, event.invite_link)
 
     except Exception as err:
+        logger.error(err)
         err_log.error(err, exc_info=True)
         raise err
 
@@ -66,6 +70,7 @@ async def as_member(event: ChatMemberUpdated, bot: Bot):
             await bot.send_message(chat_id=channel.owner.tg_id,
                                    text=f'Бот сменил статус на MEMEBER в чате {chat.id} {chat.title} пользователем {owner.username} {owner.id}')
     except Exception as err:
+        logger.error(err)
         err_log.error(err, exc_info=True)
 
 
@@ -82,6 +87,7 @@ async def left(event: ChatMemberUpdated, bot: Bot):
             print(channel.channel_id, channel.owner)
             await bot.send_message(chat_id=channel.owner.tg_id, text=f'Бот удален с канала {chat.id} {chat.title} пользователем {owner.username} {owner.id}')
     except Exception as err:
+        logger.error(err)
         err_log.error(err, exc_info=True)
 
 
@@ -98,5 +104,6 @@ async def as_admin(event: ChatMemberUpdated, bot: Bot):
         print(channel)
         await bot.send_message(chat_id=owner.id, text=f'Вы добавили бота как администратор в канал/группу {chat.title}\n\nСекретный ключ: {channel.secret}')
     except Exception as err:
+        logger.error(err)
         err_log.error(err, exc_info=True)
         raise err
