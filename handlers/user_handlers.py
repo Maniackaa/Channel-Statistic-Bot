@@ -38,6 +38,7 @@ class FSMSecret(StatesGroup):
 
 @router.message(Command(commands=["start"]))
 async def process_start_command(message: Message, state: FSMContext, bot: Bot):
+    logger.debug(f'/start {message.from_user.id}')
     await state.clear()
     referal = message.text[7:]
     new_user = get_or_create_user(message.from_user, referal)
@@ -46,15 +47,21 @@ async def process_start_command(message: Message, state: FSMContext, bot: Bot):
 
 @router.callback_query(F.data == 'channels')
 async def channels(callback: CallbackQuery):
-    print('channels')
-    user = get_or_create_user(callback.from_user)
-    your_channels = get_your_channels(user)
-    if your_channels:
-        channel_text = '\n'.join([f'{channel.title}: <code>{channel.secret}</code> {"✅" if channel.is_active else "❌"}'  for channel in your_channels])
-        text = f'Ваши каналы:\n{channel_text}'
-    else:
-        text = 'У вас нет каналов'
-    await callback.message.edit_text(text, reply_markup=start_kb)
+    try:
+        logger.debug('channels')
+        user = get_or_create_user(callback.from_user)
+        logger.debug(f'user: {user}')
+        your_channels = get_your_channels(user)
+        if your_channels:
+            channel_text = '\n'.join([f'{channel.title}: <code>{channel.secret}</code> {"✅" if channel.is_active else "❌"}'  for channel in your_channels])
+            text = f'Ваши каналы:\n{channel_text}'
+        else:
+            text = 'У вас нет каналов'
+        logger.debug(f'{text}')
+        await callback.message.edit_text(text, reply_markup=start_kb)
+    except Exception as err:
+        logger.error(err)
+        err_log.error(err, exc_info=True)
 
 
 @router.callback_query(F.data == 'stat')
@@ -118,11 +125,12 @@ async def all_time(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
 @router.callback_query(F.data.startswith('channel_'), StateFilter(FSMStat.select))
 async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
-    print('stat')
-    print(callback.data)
+    logger.debug('stat')
+    logger.debug(callback.data)
     channel_id = int(callback.data.split('channel_')[1])
     data = await state.get_data()
     channel = get_channel_from_id(channel_id)
+    logger.debug(f'channel: {channel}')
     if data:
         text = f'Отчет за период {data["start_period"].strftime("%d.%m.%Y")} - {data["end_period"].strftime("%d.%m.%Y")} по каналу {channel.title}:\n'
         period = f'{data["start_period"].strftime("%d.%m.%Y")} - {data["end_period"].strftime("%d.%m.%Y")}'

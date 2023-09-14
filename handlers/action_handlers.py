@@ -21,7 +21,7 @@ router: Router = Router()
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=LEFT))
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=KICKED))
 async def user_kick(event: ChatMemberUpdated, bot: Bot):
-    print('USER KICKED or LEFT')
+    logger.debug('USER KICKED or LEFT')
     try:
         chat = event.chat
         user = event.old_chat_member.user
@@ -34,6 +34,7 @@ async def user_kick(event: ChatMemberUpdated, bot: Bot):
     except Exception as err:
         logger.error(err)
         err_log.error(err, exc_info=True)
+        raise err
 
 
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=MEMBER))
@@ -60,7 +61,7 @@ async def user_join(event: ChatMemberUpdated, bot: Bot):
 # Действия бота
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=MEMBER))
 async def as_member(event: ChatMemberUpdated, bot: Bot):
-    print('MY event MEMBER')
+    logger.debug('MY event MEMBER')
     try:
         chat = event.chat
         owner = event.from_user
@@ -72,28 +73,30 @@ async def as_member(event: ChatMemberUpdated, bot: Bot):
     except Exception as err:
         logger.error(err)
         err_log.error(err, exc_info=True)
+        raise err
 
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=(LEFT | KICKED)))
 async def left(event: ChatMemberUpdated, bot: Bot):
-    print('MY event LEFT')
+    logger.debug('MY event LEFT')
     try:
-        print(event)
+        logger.debug(event)
         chat = event.chat
         owner = event.from_user
         logger.info(f'Бот удален с канала {chat.id} {chat.title} пользователем {owner.username} {owner.id}')
         channel = check_channel(chat)
         if channel:
-            print(channel.channel_id, channel.owner)
+            logger.debug(f'{channel.channel_id, channel.owner}')
             await bot.send_message(chat_id=channel.owner.tg_id, text=f'Бот удален с канала {chat.id} {chat.title} пользователем {owner.username} {owner.id}')
     except Exception as err:
         logger.error(err)
         err_log.error(err, exc_info=True)
+        raise err
 
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=ADMINISTRATOR))
 async def as_admin(event: ChatMemberUpdated, bot: Bot):
-    print('MY event ADMINISTRATOR')
+    logger.debug('MY event ADMINISTRATOR')
     try:
         chat = event.chat
         owner = event.from_user
@@ -101,7 +104,7 @@ async def as_admin(event: ChatMemberUpdated, bot: Bot):
         # Добавляем канал в базу
         user = get_or_create_user(owner)
         channel = get_or_create_channel(chat, user)
-        print(channel)
+        logger.debug(f'channel: {channel}')
         await bot.send_message(chat_id=owner.id, text=f'Вы добавили бота как администратор в канал/группу {chat.title}\n\nСекретный ключ: {channel.secret}')
     except Exception as err:
         logger.error(err)
