@@ -133,8 +133,8 @@ def add_join(user: User, channel: Channel, invite_link=None):
             invite_link=invite_link
         )
         session.add(new_join)
-        session.commit()
         logger.debug(f'Новое Действие join создано {new_join}')
+        session.commit()
         session.close()
         return new_join
     except Exception as err:
