@@ -212,17 +212,21 @@ def get_your_channels(user: User):
 
 
 def add_secret(user: User, secret: str):
-    session = Session()
-    old_values = user.secrets
-    logger.debug(f'Старые ключи: {old_values}')
-    new_secrets = old_values + [secret]
-    logger.debug(f'Новый список: {new_secrets}')
-    q = update(User).where(User.id == user.id).values(secrets=set(new_secrets))
-    session.execute(q)
-    session.commit()
-    logger.debug(f'Новые ключи: {user.secrets}')
-    logger.debug(f'Добавлен ключ {secret} юзеру {user}')
-    session.close()
+    try:
+        session = Session()
+        old_values = user.secrets or []
+        logger.debug(f'Старые ключи: {old_values}')
+        new_secrets = old_values + [secret]
+        logger.debug(f'Новый список: {new_secrets}')
+        q = update(User).where(User.id == user.id).values(secrets=set(new_secrets))
+        session.execute(q)
+        session.commit()
+        logger.debug(f'Новые ключи: {user.secrets}')
+        logger.debug(f'Добавлен ключ {secret} юзеру {user}')
+        session.close()
+    except Exception as err:
+        logger.error(err)
+        err_log.error(err, exc_info=True)
 
 
 def get_channel_from_id(channel_pk):
