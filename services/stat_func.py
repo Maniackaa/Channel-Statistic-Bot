@@ -86,7 +86,9 @@ def get_left_joined(channel_id, start=None, end=None):
     else:
         q = select(Action).filter(
             Action.channel_id == channel_id).filter(
-            Action.join_time.is_not(None))
+            Action.join_time.is_not(None)).filter(
+            Action.join_time.is_(None)
+        )
         logger.debug(q)
     logger.debug(q)
     res = session.execute(q).all()

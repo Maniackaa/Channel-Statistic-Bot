@@ -152,15 +152,17 @@ def add_left(user: User, channel: Channel):
     try:
         logger.debug(f'Создаем left юзеру {user} из канал {channel}')
         session = Session()
-        left_q = select(Action).where(Action.channel_id == channel.id, Action.user_id == user.id)
+        left_q = select(Action).where(Action.channel_id == channel.id).where(Action.user_id == user.id)
         left_action = session.execute(left_q).scalars().all()
         if left_action:
+            logger.debug(f'left action найдена: {left_action}')
             action = left_action[0]
             action.left_time = datetime.datetime.now(tz=tz)
             session.commit()
             logger.debug(f'Обновлен left action {action}')
             session.close()
             return action
+        logger.debug('Создаем left')
         new_left = Action(
             user_id=user.id,
             channel_id=channel.id,

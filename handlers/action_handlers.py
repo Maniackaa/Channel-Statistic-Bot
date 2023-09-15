@@ -30,6 +30,7 @@ async def user_kick(event: ChatMemberUpdated, bot: Bot):
         channel = check_channel(chat)
         if channel and channel.is_active:
             add_left(user, channel)
+        logger.debug('Удаление успешно')
 
     except Exception as err:
         logger.error(err)
