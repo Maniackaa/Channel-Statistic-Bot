@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 
 from config_data.conf import tz
 from database.db import Session, Action, User
@@ -65,15 +65,17 @@ def get_left_joined(channel_id, start=None, end=None):
     пользователей кто ВСТУПИЛ за этот же отчетный период. А
     третий пункт - учитывает ВСЕ отписки, включая тех людей что
     пришли в канал И ДО отчетного периода
+    кто встпуил и не отписался
     :return:
     """
     session = Session()
     q = select(Action).filter(
-        Action.channel_id == channel_id).where(
-        Action.left_time.is_not(None)).filter(
+        Action.channel_id == channel_id).filter(
         Action.join_time.is_not(None))
     if start and end:
-        q = q.filter(Action.join_time >= start).filter(Action.left_time <= end)
+        q = q.filter(Action.join_time >= start).filter(or_(
+                Action.left_time >= end, Action.left_time.is_not(None))
+        )
     res = session.execute(q).all()
     if res:
         return len(res)
