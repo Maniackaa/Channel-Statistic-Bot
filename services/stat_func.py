@@ -332,12 +332,7 @@ def outgoings_in_period(channel_id, start=None, end=None):
         outgoings_q = outgoings_q.filter(Action.left_time >= start)
     if end:
         outgoings_q = outgoings_q.filter(Action.left_time <= end + datetime.timedelta(days=1))
-    outgoings: list[Action] = session.execute(outgoings_q).scalars().all()
+    outgoings: list[Action] = session.execute(outgoings_q).all()
     logger.debug(outgoings)
     return outgoings
 
-
-x = outgoings_in_period(1)
-
-for usr in x:
-    print(usr.left_time - usr.join_time)
