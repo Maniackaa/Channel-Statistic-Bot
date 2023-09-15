@@ -204,7 +204,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
                                        action.left_time - action.join_time]
 
     df_file = f'{callback.from_user.id}.xlsx'
-    print(df.to_excel(df_file, index=False))
+    # print(df.to_excel(df_file, index=False))
     doc = FSInputFile(df_file)
     await bot.send_document(chat_id=callback.from_user.id, document=doc)
     await state.clear()

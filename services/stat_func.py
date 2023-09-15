@@ -300,17 +300,21 @@ def get_avg_time_all(channel_id, start=None, end=None):
 
 def incomings_in_period(channel_id, start=None, end=None):
     """ВСТУПИЛИ ЗА УКАЗАННЫЙ ПЕРИОД"""
+    logger.debug('"""ВСТУПИЛИ ЗА УКАЗАННЫЙ ПЕРИОД""')
     session = Session()
     incomings_q = select(Action, Action.user).filter(
         Action.channel_id == channel_id).where(
         Action.join_time.is_not(None)).join(
         User
     )
+    logger.debug(incomings_q)
     if start:
         incomings_q = incomings_q.filter(Action.join_time >= start)
     if end:
         incomings_q = incomings_q.filter(Action.join_time <= end + datetime.timedelta(days=1))
+    logger.debug(incomings_q)
     incomings: list[Action] = session.execute(incomings_q).scalars().all()
+    logger.debug(incomings)
     return incomings
 
 
