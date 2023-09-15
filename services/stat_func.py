@@ -91,7 +91,7 @@ def get_left_joined(channel_id, start=None, end=None):
         )
         logger.debug(q)
     logger.debug(q)
-    res = session.execute(q).all()
+    res = session.execute(q).scalars().all()
     logger.debug(res)
     if res:
         return len(res)
