@@ -74,7 +74,7 @@ def get_left_joined(channel_id, start=None, end=None):
         Action.join_time.is_not(None))
     if start and end:
         q = q.filter(Action.join_time >= start).filter(or_(
-                Action.left_time >= end, Action.left_time.is_not(None))
+                Action.left_time >= end, Action.left_time.is_(None))
         )
     res = session.execute(q).all()
     if res:
