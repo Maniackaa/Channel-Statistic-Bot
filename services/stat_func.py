@@ -5,7 +5,9 @@ from sqlalchemy import select, func, or_
 
 from config_data.conf import tz, get_my_loggers
 from database.db import Session, Action, User
+
 logger, err_log = get_my_loggers()
+
 
 def get_all_join(channel_id, start=None, end=None):
     """Всего вступило - это всего вступило пользователей за
@@ -74,8 +76,8 @@ def get_left_joined(channel_id, start=None, end=None):
 
     if start and end:
         q = select(Action).filter(
-        Action.channel_id == channel_id).filter(
-        Action.join_time.is_not(None)).filter(
+            Action.channel_id == channel_id).filter(
+            Action.join_time.is_not(None)).filter(
             and_(
                 Action.join_time >= start,
                 Action.join_time <= end)).filter(
@@ -96,6 +98,7 @@ def get_left_joined(channel_id, start=None, end=None):
     if res:
         return len(res)
     return 0
+
 
 def get_proc_new_left(channel_id, start=None, end=None):
     """
@@ -222,7 +225,7 @@ def get_avg_time_lefted(channel_id, start=None, end=None):
     if avg_time_lefted:
         avg_time = total_sec / len(avg_time_lefted)
         print(datetime.timedelta(seconds=avg_time).days)
-        return round(avg_time / 60 / 60, 2)
+        return round(avg_time / 60 / 60 / 24, 1)
     return '-'
 
 
@@ -239,7 +242,8 @@ def get_avg_day_time_lefted(channel_id, start=None, end=None):
     session = Session()
     avg_time_lefted_q = select(Action.left_time - Action.join_time).filter(
         Action.channel_id == channel_id).where(
-        Action.join_time.is_not(None)).where(Action.left_time.is_not(None)).filter(Action.left_time - Action.join_time >= datetime.timedelta(days=1))
+        Action.join_time.is_not(None)).where(Action.left_time.is_not(None)).filter(
+        Action.left_time - Action.join_time >= datetime.timedelta(days=1))
     if start:
         avg_time_lefted_q = avg_time_lefted_q.filter(Action.left_time >= start)
     if end:
@@ -336,6 +340,7 @@ def outgoings_in_period(channel_id, start=None, end=None):
     logger.debug(outgoings)
     session.close()
     return outgoings
+
 
 outgoing_users: list[Action] = outgoings_in_period(1)
 print(outgoing_users)

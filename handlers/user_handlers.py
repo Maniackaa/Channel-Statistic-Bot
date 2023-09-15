@@ -162,7 +162,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     join_without_login = get_join_without_login(channel_id, start, end)
     text += f'Подписки без логинов: {join_without_login}\n'
     avg_time_lefted = get_avg_time_lefted(channel_id, start, end)
-    text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период: {avg_time_lefted} ч.\n'
+    text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период: {avg_time_lefted} дн.\n'
     avg_day_time_lefted = get_avg_day_time_lefted(channel_id, start, end)
     text += f'Среднее время нахождение в канале ОТПИСАВШИХСЯ за отчетный период больше 1 дня: {avg_day_time_lefted} ч.\n'
     avg_time_all = get_avg_time_all(channel_id, start, end)
