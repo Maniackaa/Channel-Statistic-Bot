@@ -3,9 +3,9 @@ from operator import and_
 
 from sqlalchemy import select, func, or_
 
-from config_data.conf import tz
+from config_data.conf import tz, get_my_loggers
 from database.db import Session, Action, User
-
+logger, err_log = get_my_loggers()
 
 def get_all_join(channel_id, start=None, end=None):
     """Всего вступило - это всего вступило пользователей за
@@ -69,10 +69,12 @@ def get_left_joined(channel_id, start=None, end=None):
     кто встпуил и не отписался
     :return:
     """
+    logger.debug('get_left_joined')
     session = Session()
     q = select(Action).filter(
         Action.channel_id == channel_id).filter(
         Action.join_time.is_not(None))
+    logger.debug(q)
     if start and end:
         q = q.filter(
             and_(
@@ -82,7 +84,9 @@ def get_left_joined(channel_id, start=None, end=None):
 
                 Action.left_time.is_(None))
         )
+    logger.debug(q)
     res = session.execute(q).all()
+    logger.debug(res)
     if res:
         return len(res)
     return 0
