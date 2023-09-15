@@ -80,11 +80,3 @@ async def select(callback: CallbackQuery, state: FSMContext, bot: Bot):
         err_log.error(err)
 
 
-@router.message()
-async def echo(message: Message, state: FSMContext, bot: Bot):
-    print(message.content_type)
-
-
-@router.callback_query()
-async def echo(callback: CallbackQuery, state: FSMContext):
-    print(callback.data)

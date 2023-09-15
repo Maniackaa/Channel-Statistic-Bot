@@ -265,13 +265,3 @@ async def change(callback: CallbackQuery, state: FSMContext):
     user = get_or_create_user(callback.from_user)
     channels: list[Channel] = get_your_channels(user)
     await callback.message.edit_reply_markup(reply_markup=channel_kb(1, channels))
-
-
-@router.message()
-async def echo(message: Message, state: FSMContext, bot: Bot):
-    logger.debug(f'echo: {message.text}')
-
-
-@router.callback_query()
-async def echo(callback: CallbackQuery, state: FSMContext):
-    logger.debug(f'callback echo: {callback.data}')
