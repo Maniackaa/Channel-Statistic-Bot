@@ -83,7 +83,7 @@ async def part_time(callback: CallbackQuery, state: FSMContext):
 async def start_period(message: Message, state: FSMContext, bot: Bot):
     date_text = message.text.strip()
     try:
-        date = datetime.datetime.strptime(date_text, '%d.%m.%Y').astimezone(tz=tz)
+        date = datetime.datetime.strptime(date_text, '%d.%m.%Y')
         await state.update_data(start_period=date)
         await message.answer('Введите конец периода в формате ДД.ММ.ГГГГ')
         await state.set_state(FSMStat.end_period)
@@ -95,7 +95,7 @@ async def start_period(message: Message, state: FSMContext, bot: Bot):
 async def end_period(message: Message, state: FSMContext, bot: Bot):
     date_text = message.text.strip()
     try:
-        date = datetime.datetime.strptime(date_text, '%d.%m.%Y').astimezone(tz=tz)
+        date = datetime.datetime.strptime(date_text, '%d.%m.%Y')
         await state.update_data(end_period=date)
         user = get_or_create_user(message.from_user)
         channels: list[Channel] = get_your_channels(user)
