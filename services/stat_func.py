@@ -69,7 +69,7 @@ def get_left_joined(channel_id, start=None, end=None):
     кто встпуил и не отписался
     :return:
     """
-    logger.debug(f'get_left_joined: {start}, {end} {start and end}')
+    logger.debug(f'get_left_joined: {channel_id}, {start}, {end}')
     session = Session()
 
     if start and end:
@@ -87,7 +87,7 @@ def get_left_joined(channel_id, start=None, end=None):
         q = select(Action).filter(
             Action.channel_id == channel_id).filter(
             Action.join_time.is_not(None)).filter(
-            Action.join_time.is_(None)
+            Action.left_time.is_(None)
         )
         logger.debug(q)
     logger.debug(q)
