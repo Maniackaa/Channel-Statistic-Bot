@@ -306,7 +306,7 @@ def incomings_in_period(channel_id, start=None, end=None):
         Action.channel_id == channel_id).where(
         Action.join_time.is_not(None)).join(
         User
-    )
+    ).order_by(Action.join_time)
     logger.debug(incomings_q)
     if start:
         incomings_q = incomings_q.filter(Action.join_time >= start)
@@ -326,7 +326,7 @@ def outgoings_in_period(channel_id, start=None, end=None):
         Action.join_time.is_not(None)).where(
         Action.left_time.is_not(None)).join(
         User
-    )
+    ).order_by(Action.left_time)
     logger.debug(outgoings_q)
     if start:
         outgoings_q = outgoings_q.filter(Action.left_time >= start)
