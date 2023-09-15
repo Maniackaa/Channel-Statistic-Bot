@@ -10,9 +10,9 @@ async def main():
     logger.info('Starting bot')
     bot: Bot = Bot(token=conf.tg_bot.token, parse_mode='HTML')
     dp: Dispatcher = Dispatcher()
-    dp.include_router(user_handlers.router)
-    dp.include_router(action_handlers.router)
     dp.include_router(excel_handlers.router)
+    dp.include_router(action_handlers.router)
+    dp.include_router(user_handlers.router)
     await bot.delete_webhook(drop_pending_updates=True)
 
     try:

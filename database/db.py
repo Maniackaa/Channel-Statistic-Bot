@@ -36,7 +36,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), nullable=True)
     first_name: Mapped[str] = mapped_column(String(50), nullable=True)
     last_name: Mapped[str] = mapped_column(String(50), nullable=True)
-    full_name: Mapped[str] = mapped_column(String(50), nullable=True)
+    full_name: Mapped[str] = mapped_column(String(200), nullable=True)
     register_date: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
     channels: Mapped[list['Channel']] = relationship(back_populates='owner')
     referral: Mapped[str] = mapped_column(String(20), nullable=True)
