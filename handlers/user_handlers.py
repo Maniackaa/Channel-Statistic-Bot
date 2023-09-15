@@ -129,6 +129,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     logger.debug(callback.data)
     channel_id = int(callback.data.split('channel_')[1])
     data = await state.get_data()
+    logger.debug(f'data: {data}')
     channel = get_channel_from_id(channel_id)
     logger.debug(f'channel: {channel}')
     if data:
@@ -138,7 +139,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
         text = f'Отчет за весь период по каналу {channel.title}:\n'
         period = f'Весь период'
     start = data.get('start_period')
-    end = data.get('end')
+    end = data.get('end_period')
     all_join = get_all_join(channel_id, start, end)
     text += f'Всего вступило: {all_join}\n'
     all_left = get_all_left(channel_id, start, end)
