@@ -69,7 +69,7 @@ def get_left_joined(channel_id, start=None, end=None):
     кто встпуил и не отписался
     :return:
     """
-    logger.debug('get_left_joined')
+    logger.debug(f'get_left_joined: {start}, {end} {start and end}')
     session = Session()
 
     if start and end:
