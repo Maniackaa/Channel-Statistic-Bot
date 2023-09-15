@@ -38,9 +38,9 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(50), nullable=True)
     full_name: Mapped[str] = mapped_column(String(200), nullable=True)
     register_date: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
-    channels: Mapped[list['Channel']] = relationship(back_populates='owner')
+    channels: Mapped[list['Channel']] = relationship(back_populates='owner', lazy='subquery')
     referral: Mapped[str] = mapped_column(String(20), nullable=True)
-    actions: Mapped[list['Action']] = relationship(back_populates='user')
+    actions: Mapped[list['Action']] = relationship(back_populates='user', lazy='subquery')
     secrets: Mapped[list] = mapped_column(ARRAY(String(36)), nullable=True)
 
     def __repr__(self):
@@ -57,7 +57,7 @@ class Channel(Base):
     description: Mapped[str] = mapped_column(String(250), nullable=True)
     is_active: Mapped[int] = mapped_column(Integer(), default=1)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
-    owner: Mapped['User'] = relationship(back_populates='channels')
+    owner: Mapped['User'] = relationship(back_populates='channels', lazy='subquery')
     secret: Mapped[str] = mapped_column(String(36), nullable=True, default=lambda: uuid.uuid4())
 
     def __repr__(self):
@@ -77,7 +77,7 @@ class Action(Base):
                                     autoincrement=True,
                                     comment='Первичный ключ')
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    user: Mapped['User'] = relationship(back_populates='actions')
+    user: Mapped['User'] = relationship(back_populates='actions', lazy='subquery')
     channel_id: Mapped[int] = mapped_column(ForeignKey('channels.id', ondelete='CASCADE'))
     join_time: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
     left_time: Mapped[time] = mapped_column(DateTime(timezone=True), nullable=True)
