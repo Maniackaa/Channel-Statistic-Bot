@@ -46,13 +46,14 @@ def get_new_left(channel_id, start=None, end=None):
     за отчетный период
     :return:
     """
+    logger.debug(f'get_new_left {channel_id}, {start}, {end}')
     session = Session()
     q = select(Action).filter(
         Action.channel_id == channel_id).where(
         Action.left_time.is_not(None)).filter(
         Action.join_time.is_not(None))
     if start:
-        q = q.filter(Action.join_time >= start)
+        q = q.filter(Action.join_time >= start).filter(Action.join_time <= end)
     if end:
         q = q.filter(Action.join_time <= end + datetime.timedelta(days=1))
     new_left = session.execute(q).all()
@@ -63,12 +64,8 @@ def get_new_left(channel_id, start=None, end=None):
 
 def get_left_joined(channel_id, start=None, end=None):
     """
-    Вступило с учетом отписок только тех кто вступил - здесь
-    количество подписок учитывает только отписки тех
-    пользователей кто ВСТУПИЛ за этот же отчетный период. А
-    третий пункт - учитывает ВСЕ отписки, включая тех людей что
-    пришли в канал И ДО отчетного периода
-    кто встпуил и не отписался
+    только отписки тех
+    пользователей кто ВСТУПИЛ за этот же отчетный период.
     :return:
     """
     logger.debug(f'get_left_joined: {channel_id}, {start}, {end}')
@@ -82,14 +79,15 @@ def get_left_joined(channel_id, start=None, end=None):
                 Action.join_time >= start,
                 Action.join_time <= end)).filter(
             or_(
-
-                Action.left_time.is_(None))
-        )
+                Action.left_time.is_not(None))
+        ).filter(
+            Action.left_time >= start
+        ).filter(Action.left_time <= end)
     else:
         q = select(Action).filter(
             Action.channel_id == channel_id).filter(
             Action.join_time.is_not(None)).filter(
-            Action.left_time.is_(None)
+            Action.left_time.is_not(None)
         )
         logger.debug(q)
     logger.debug(q)
