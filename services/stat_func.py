@@ -71,12 +71,11 @@ def get_left_joined(channel_id, start=None, end=None):
     """
     logger.debug('get_left_joined')
     session = Session()
-    q = select(Action).filter(
-        Action.channel_id == channel_id).filter(
-        Action.join_time.is_not(None))
-    logger.debug(q)
+
     if start and end:
-        q = q.filter(
+        q = select(Action).filter(
+        Action.channel_id == channel_id).filter(
+        Action.join_time.is_not(None)).filter(
             and_(
                 Action.join_time >= start,
                 Action.join_time <= end)).filter(
@@ -84,6 +83,11 @@ def get_left_joined(channel_id, start=None, end=None):
 
                 Action.left_time.is_(None))
         )
+    else:
+        q = select(Action).filter(
+            Action.channel_id == channel_id).filter(
+            Action.join_time.is_not(None))
+        logger.debug(q)
     logger.debug(q)
     res = session.execute(q).all()
     logger.debug(res)
