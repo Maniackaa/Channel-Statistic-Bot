@@ -18,7 +18,7 @@ from lexicon.lexicon import LEXICON_RU
 from services.db_func import get_or_create_user, get_your_channels, add_secret, check_channel, get_channel_from_id, \
     get_only_your_channels, change_monitoring
 from services.stat_func import get_all_join, get_all_left, get_new_left, get_proc_new_left, get_join_with_login, \
-    get_join_without_login, get_avg_time_lefted, get_avg_day_time_lefted, get_avg_time_all, get_left_joined, \
+    get_join_without_login, get_avg_time_lefted, get_avg_day_time_lefted, get_avg_time_all, \
     incomings_in_period, outgoings_in_period
 
 logger, err_log = get_my_loggers()
