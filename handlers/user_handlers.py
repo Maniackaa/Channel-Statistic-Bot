@@ -153,8 +153,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
         all_proc = '-'
     new_left = get_new_left(channel_id, start, end)
     text += f'Отписалось из новых подписчиков за период: {new_left}\n'
-    left_joined = get_left_joined(channel_id, start, end)
-    text += f'Вступило с учетом отписок только тех кто вступил: {all_join} - {left_joined}\n'
+    text += f'Вступило с учетом отписок только тех кто вступил: {all_join} - {new_left}\n'
     proc_new_left = get_proc_new_left(channel_id, start, end)
     text += f'Процент отписок только НОВЫХ подписчиков за период: {proc_new_left} %\n'
     join_with_login = get_join_with_login(channel_id, start, end)
