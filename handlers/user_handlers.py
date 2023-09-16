@@ -153,7 +153,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
         all_proc = '-'
     new_left = get_new_left(channel_id, start, end)
     text += f'Отписалось из новых подписчиков за период: {new_left}\n'
-    text += f'Вступило с учетом отписок только тех кто вступил: {all_join} - {new_left}\n'
+    text += f'Вступило новых за вычетом отписок: {all_join - new_left}\n'
     proc_new_left = get_proc_new_left(channel_id, start, end)
     text += f'Процент отписок только НОВЫХ подписчиков за период: {proc_new_left} %\n'
     join_with_login = get_join_with_login(channel_id, start, end)
@@ -172,10 +172,10 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     df.loc[len(df.index)] = ['Отчетный период', period] + ['', '']
     df.loc[len(df.index)] = ['Всего вступило', all_join] + ['', '']
     df.loc[len(df.index)] = ['Всего отписалось', all_left] + ['', '']
-    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', all_join - all_left] + ['', '']
+    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', (all_join - all_left)] + ['', '']
     df.loc[len(df.index)] = ['Общий процент отписок за период', all_proc] + ['', '']
     df.loc[len(df.index)] = ['Отписалось из новых подписчиков за период', new_left] + ['', '']
-    df.loc[len(df.index)] = ['Вступило с учетом отписок только тех кто вступил', left_joined] + ['', '']
+    df.loc[len(df.index)] = ['Вступило новых за вычетом отписок', all_join - new_left] + ['', '']
     df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left] + ['', '']
     df.loc[len(df.index)] = ['Подписки с логинами', join_with_login] + ['', '']
     df.loc[len(df.index)] = ['Подписки без логинов', join_without_login] + ['', '']
