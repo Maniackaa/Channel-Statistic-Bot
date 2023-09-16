@@ -41,33 +41,10 @@ def get_all_left(channel_id, start=None, end=None):
 
 def get_new_left(channel_id, start=None, end=None):
     """
-    Отписалось из новых подписчиков за период - сколько человек
-    отписалось ТОЛЬКО из тех пользователей что ПРИШЕЛ в канал
-    за отчетный период
-    :return:
-    """
-    logger.debug(f'get_new_left {channel_id}, {start}, {end}')
-    session = Session()
-    q = select(Action).filter(
-        Action.channel_id == channel_id).where(
-        Action.left_time.is_not(None)).filter(
-        Action.join_time.is_not(None))
-    if start:
-        q = q.filter(Action.join_time >= start).filter(Action.join_time <= end)
-    if end:
-        q = q.filter(Action.join_time <= end + datetime.timedelta(days=1))
-    new_left = session.execute(q).all()
-    if new_left:
-        return len(new_left)
-    return 0
-
-
-def get_left_joined(channel_id, start=None, end=None):
-    """
-    только отписки тех
-    пользователей кто ВСТУПИЛ за этот же отчетный период.
-    :return:
-    """
+        только отписки тех
+        пользователей кто ВСТУПИЛ за этот же отчетный период.
+        :return:
+        """
     logger.debug(f'get_left_joined: {channel_id}, {start}, {end}')
     session = Session()
 

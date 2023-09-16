@@ -57,7 +57,7 @@ class Channel(Base):
     description: Mapped[str] = mapped_column(String(250), nullable=True)
     is_active: Mapped[int] = mapped_column(Integer(), default=1)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
-    owner: Mapped['User'] = relationship(back_populates='channels', lazy='subquery')
+    owner: Mapped['User'] = relationship(back_populates='channels')
     secret: Mapped[str] = mapped_column(String(36), nullable=True, default=lambda: uuid.uuid4())
 
     def __repr__(self):
