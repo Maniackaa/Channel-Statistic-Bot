@@ -302,7 +302,6 @@ def outgoings_in_period(channel_id, start=None, end=None):
     session = Session()
     outgoings_q = select(Action, Action.user).filter(
         Action.channel_id == channel_id).where(
-        Action.join_time.is_not(None)).where(
         Action.left_time.is_not(None)).join(
         User
     ).order_by(Action.left_time)
