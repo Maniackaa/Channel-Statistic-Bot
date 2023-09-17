@@ -200,7 +200,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
         df.loc[len(df.index)] = [action.user.full_name,
                                        action.user.username,
                                        action.left_time.strftime("%d.%m.%Y"),
-                                       action.left_time - action.join_time]
+                                       action.left_time - action.join_time if action.left_time and action.join_time else 'неизвестно']
 
     df_file = f'{callback.from_user.id}.xlsx'
     df.to_excel(df_file, index=False)
