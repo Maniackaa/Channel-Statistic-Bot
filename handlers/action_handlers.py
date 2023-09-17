@@ -51,8 +51,11 @@ async def user_join(event: ChatMemberUpdated, bot: Bot):
         logger.debug(f'user: {user}')
         channel: Channel = check_channel(chat)
         logger.debug(f'channel: {channel}')
+        invite_link = None
         if channel and channel.is_active:
-            add_join(user, channel, event.invite_link.invite_link)
+            if event.invite_link:
+                invite_link = event.invite_link.invite_link
+            add_join(user, channel, invite_link )
 
     except Exception as err:
         logger.error(err)
