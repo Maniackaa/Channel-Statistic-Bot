@@ -46,24 +46,32 @@ async def xls(message: Message, state: FSMContext, bot: Bot):
 @router.callback_query(F.data.startswith('xchannel_'))
 async def select(callback: CallbackQuery, state: FSMContext, bot: Bot):
     await callback.message.delete()
+    logger.debug(callback.data)
     try:
         channel_id = int(callback.data.split('channel_')[1])
+        logger.debug(f'channel_id: {channel_id}')
         file_path = f'{callback.from_user.id}.xlsx'
+        logger.debug(f'file_path: {file_path}')
         with open(file_path, 'rb') as file:
-            df = pd.read_excel(file, engine='openpyxl')
+            df = pd.read_excel(file, engine='openpyxl', na_values='NaT')
+        print(df)
         tg_ids = df.iloc[:, 0].apply(find_user_tg_id, args=(channel_id,))
+        logger.debug(f'tg_ids: {tg_ids}')
         join_times = df.iloc[:, 0].apply(find_user_join, args=(channel_id,))
+        logger.debug(f'join_times {join_times}')
         df.insert(0, 'ID', tg_ids)
         df['Дата подписки'] = join_times
         delta = []
         for row in df.values:
             try:
+                logger.debug(f'row: {row}')
                 buy_date = row[4]
                 buy_date = datetime.datetime.fromisoformat(str(buy_date))
                 join_date = row[6]
                 period = buy_date.date() - join_date
                 delta.append(period)
-            except TypeError:
+            except Exception as err:
+                logger.warning(err)
                 delta.append(None)
                 pass
         df['Время нахождения в канале до покупки, дни'] = delta

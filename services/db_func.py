@@ -263,12 +263,15 @@ def find_user_tg_id(login, channel_id):
 
 def find_user_join(login, channel_id):
     try:
+        logger.debug(f'find_user_join: {login}, {channel_id}')
         session = Session()
         q = select(Action).where(User.username == login).where(Action.channel_id == channel_id).join(User)
         action: Action = session.execute(q).scalars().one_or_none()
-        if action:
+        logger.debug(f'action: {action}')
+        if action and action.join_time:
             return action.join_time.date()
     except Exception as err:
+        logger.debug(err)
         raise err
 
 
