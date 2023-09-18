@@ -5,7 +5,7 @@ from aiogram import Router, Bot, F
 from aiogram.filters import Command, ChatMemberUpdatedFilter, MEMBER, LEFT, ADMINISTRATOR, KICKED, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message, ChatInviteLink, \
-    InlineKeyboardButton, ChatMemberUpdated, FSInputFile
+    InlineKeyboardButton, ChatMemberUpdated, FSInputFile, Chat, ChatJoinRequest
 
 from aiogram.fsm.context import FSMContext
 import pandas as pd
@@ -209,6 +209,12 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     await state.clear()
     await callback.message.delete()
 
+    # invite_link = await bot.export_chat_invite_link(-1001697211543)
+    # await callback.message.answer(invite_link)
+    # result: ChatInviteLink = await bot.create_chat_invite_link(-1001697211543, member_limit=100)
+    # print(result)
+    # await callback.message.answer(result.invite_link)
+
 
 @router.message(F.text.regexp(r"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}").as_("digits"))
 async def secret(message: Message, state: FSMContext, bot: Bot):
@@ -265,3 +271,24 @@ async def change(callback: CallbackQuery, state: FSMContext):
     user = get_or_create_user(callback.from_user)
     channels: list[Channel] = get_your_channels(user)
     await callback.message.edit_reply_markup(reply_markup=channel_kb(1, channels))
+
+
+
+@router.chat_join_request()
+async def as_admin(event: ChatJoinRequest, bot: Bot):
+    logger.debug('ChatJoinRequest')
+    print(event)
+
+
+
+
+@router.chat_member()
+async def as_admin(event, bot: Bot):
+
+    print('chat_member')
+    print(event)
+
+@router.message()
+async def secret(message):
+    print(message)
+    print('echo')

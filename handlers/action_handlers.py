@@ -3,8 +3,7 @@ import datetime
 from aiogram import Router, Bot, F
 from aiogram.filters import Command, ChatMemberUpdatedFilter, MEMBER, LEFT, ADMINISTRATOR, KICKED
 from aiogram.types import CallbackQuery, Message, ChatInviteLink, \
-    InlineKeyboardButton, ChatMemberUpdated
-
+    InlineKeyboardButton, ChatMemberUpdated, ChatJoinRequest
 
 from config_data.conf import get_my_loggers
 
@@ -39,8 +38,9 @@ async def user_kick(event: ChatMemberUpdated, bot: Bot):
 
 
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=MEMBER))
-async def user_join(event: ChatMemberUpdated, bot: Bot):
+async def user_join(event: ChatMemberUpdated, bot: Bot, *args, **kwargs):
     logger.debug('USER MEMBER')
+    print(args, kwargs)
     try:
         print(event)
         chat = event.chat
@@ -55,7 +55,7 @@ async def user_join(event: ChatMemberUpdated, bot: Bot):
         if channel and channel.is_active:
             if event.invite_link:
                 invite_link = event.invite_link.invite_link
-            add_join(user, channel, invite_link )
+            add_join(user, channel, invite_link)
 
     except Exception as err:
         logger.error(err)
@@ -65,8 +65,9 @@ async def user_join(event: ChatMemberUpdated, bot: Bot):
 
 # Действия бота
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=MEMBER))
-async def as_member(event: ChatMemberUpdated, bot: Bot):
+async def as_member(event: ChatMemberUpdated, bot: Bot, *args, **kwargs):
     logger.debug('MY event MEMBER')
+    print(args, kwargs)
     try:
         chat = event.chat
         owner = event.from_user
@@ -115,3 +116,5 @@ async def as_admin(event: ChatMemberUpdated, bot: Bot):
         logger.error(err)
         err_log.error(err, exc_info=True)
         raise err
+
+
