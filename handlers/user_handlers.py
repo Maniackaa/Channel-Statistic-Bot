@@ -193,14 +193,17 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
                                        action.join_time.strftime("%d.%m.%Y"),
                                        action.invite_link]
 
-    df.loc[len(df.index)] = [''] * 4
-    df.loc[len(df.index)] = ['Имя', 'Username', 'Дата отписки', 'Время нахождения в канале']
+    df.loc[len(df.index)] = [''] * 5
+    df.loc[len(df.index)] = ['Имя', 'Username', 'Дата отписки', 'Время нахождения в канале', 'Ссылка-инвайт']
     outgoing_users: list[Action] = outgoings_in_period(channel_id, start, end)
     for action in outgoing_users:
-        df.loc[len(df.index)] = [action.user.full_name,
-                                       action.user.username,
-                                       action.left_time.strftime("%d.%m.%Y"),
-                                       action.left_time - action.join_time if action.left_time and action.join_time else 'неизвестно']
+        df.loc[len(df.index)] = [
+            action.user.full_name,
+            action.user.username,
+            action.left_time.strftime("%d.%m.%Y"),
+            action.left_time - action.join_time if action.left_time and action.join_time else 'неизвестно',
+            action.invite_link
+        ]
 
     df_file = f'{callback.from_user.id}.xlsx'
     df.to_excel(df_file, index=False)
