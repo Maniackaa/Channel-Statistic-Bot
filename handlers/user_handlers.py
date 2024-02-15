@@ -169,19 +169,19 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     await callback.message.answer(text)
 
     df = pd.DataFrame(columns=['Наименование', 'Показатель', 'Дата', 'Доп инфо', '-'])
-    df.loc[len(df.index)] = ['Отчетный период', period] + ['', '']
-    df.loc[len(df.index)] = ['Всего вступило', all_join] + ['', '']
-    df.loc[len(df.index)] = ['Всего отписалось', all_left] + ['', '']
-    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', (all_join - all_left)] + ['', '']
-    df.loc[len(df.index)] = ['Общий процент отписок за период', all_proc] + ['', '']
-    df.loc[len(df.index)] = ['Отписалось из новых подписчиков за период', new_left] + ['', '']
-    df.loc[len(df.index)] = ['Вступило новых за вычетом отписок', all_join - new_left] + ['', '']
-    df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left] + ['', '']
-    df.loc[len(df.index)] = ['Подписки с логинами', join_with_login] + ['', '']
-    df.loc[len(df.index)] = ['Подписки без логинов', join_without_login] + ['', '']
-    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.'] + ['', '']
-    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.'] + ['', '']
-    df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all] + ['', '']
+    df.loc[len(df.index)] = ['Отчетный период', period] + ['', '', '']
+    df.loc[len(df.index)] = ['Всего вступило', all_join] + ['', '', '']
+    df.loc[len(df.index)] = ['Всего отписалось', all_left] + ['', '', '']
+    df.loc[len(df.index)] = ['Вступило с учетом всех отписок', (all_join - all_left)] + ['', '', '']
+    df.loc[len(df.index)] = ['Общий процент отписок за период', all_proc] + ['', '', '']
+    df.loc[len(df.index)] = ['Отписалось из новых подписчиков за период', new_left] + ['', '', '']
+    df.loc[len(df.index)] = ['Вступило новых за вычетом отписок', all_join - new_left] + ['', '', '']
+    df.loc[len(df.index)] = ['Процент отписок только НОВЫХ подписчиков за период', proc_new_left] + ['', '', '']
+    df.loc[len(df.index)] = ['Подписки с логинами', join_with_login] + ['', '', '']
+    df.loc[len(df.index)] = ['Подписки без логинов', join_without_login] + ['', '', '']
+    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период', f'{avg_time_lefted} ч.'] + ['', '', '']
+    df.loc[len(df.index)] = ['Среднее время нахождения в канале ОТПИСАШИХСЯ за отчетный период больше 1 дня', f'{avg_day_time_lefted} ч.'] + ['', '', '']
+    df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all] + ['', '', '']
 
 
     df.loc[len(df.index)] = [''] * 5
