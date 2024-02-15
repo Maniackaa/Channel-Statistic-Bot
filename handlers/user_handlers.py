@@ -168,7 +168,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     text += f'Среднее время удержания всех подписчиков в канале >1 дня за период: {avg_time_all}'
     await callback.message.answer(text)
 
-    df = pd.DataFrame(columns=['Наименование', 'Показатель', 'Дата', 'Доп инфо'])
+    df = pd.DataFrame(columns=['Наименование', 'Показатель', 'Дата', 'Доп инфо', '-'])
     df.loc[len(df.index)] = ['Отчетный период', period] + ['', '']
     df.loc[len(df.index)] = ['Всего вступило', all_join] + ['', '']
     df.loc[len(df.index)] = ['Всего отписалось', all_left] + ['', '']
@@ -184,14 +184,15 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
     df.loc[len(df.index)] = ['Среднее время удержания всех подписчиков в канале >1 дня за период', avg_time_all] + ['', '']
 
 
-    df.loc[len(df.index)] = [''] * 4
-    df.loc[len(df.index)] = ['Имя', 'Username', 'Дата вступления', 'Ссылка-инвайт']
+    df.loc[len(df.index)] = [''] * 5
+    df.loc[len(df.index)] = ['Имя', 'Username', 'Дата вступления', 'Ссылка-инвайт', '-']
     incoming_users: list[Action] = incomings_in_period(channel_id, start, end)
     for action in incoming_users:
         df.loc[len(df.index)] = [action.user.full_name,
                                        action.user.username,
                                        action.join_time.strftime("%d.%m.%Y"),
-                                       action.invite_link or '']
+                                       action.invite_link or '',
+                                       ' ']
 
     df.loc[len(df.index)] = [''] * 5
     df.loc[len(df.index)] = ['Имя', 'Username', 'Дата отписки', 'Время нахождения в канале', 'Ссылка-инвайт']
