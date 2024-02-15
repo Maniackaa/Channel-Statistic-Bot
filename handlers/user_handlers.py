@@ -191,7 +191,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
         df.loc[len(df.index)] = [action.user.full_name,
                                        action.user.username,
                                        action.join_time.strftime("%d.%m.%Y"),
-                                       action.invite_link]
+                                       action.invite_link or '']
 
     df.loc[len(df.index)] = [''] * 5
     df.loc[len(df.index)] = ['Имя', 'Username', 'Дата отписки', 'Время нахождения в канале', 'Ссылка-инвайт']
@@ -202,7 +202,7 @@ async def stat(callback: CallbackQuery, state: FSMContext, bot: Bot):
             action.user.username,
             action.left_time.strftime("%d.%m.%Y"),
             action.left_time - action.join_time if action.left_time and action.join_time else 'неизвестно',
-            action.invite_link
+            action.invite_link or ''
         ]
 
     df_file = f'{callback.from_user.id}.xlsx'
